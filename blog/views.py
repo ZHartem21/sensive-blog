@@ -2,6 +2,8 @@ from django.shortcuts import render
 from blog.models import Comment, Post, Tag
 from django.db.models import Count
 
+POPULAR_TAGS_AMOUNT = 5
+
 
 def get_related_posts_count(tag):
     return tag.posts.count()
@@ -43,10 +45,8 @@ def index(request):
 
     fresh_posts = Post.objects.order_by('published_at')
     most_fresh_posts = list(fresh_posts)[-5:]
-
-    tags = Tag.objects.all()
-    popular_tags = sorted(tags, key=get_related_posts_count)
-    most_popular_tags = popular_tags[-5:]
+    popular_tags = Tag.objects.annotate(num_posts=Count('posts')).order_by('-num_posts')
+    most_popular_tags = popular_tags[:POPULAR_TAGS_AMOUNT]
 
     context = {
         'most_popular_posts': [
