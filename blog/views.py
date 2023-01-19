@@ -12,8 +12,8 @@ def get_likes_count(post):
 
 
 def get_most_liked_posts(amount):
-    posts = Post.objects.annotate(num_likes=Count('likes'))
-    return sorted(posts, key=get_likes_count, reverse=True)[:amount]
+    posts = Post.objects.annotate(num_likes=Count('likes')).order_by('-num_likes')
+    return posts[:amount]
 
 
 def serialize_post(post):
