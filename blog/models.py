@@ -24,12 +24,12 @@ class PostQuerySet(models.QuerySet):
         return self
 
 
-
 class TagQuerySet(models.QuerySet):
 
     def popular(self):
         popular_tags = Tag.objects.annotate(num_posts=Count('posts')).order_by('-num_posts')
         return popular_tags
+
 
 class Post(models.Model):
     title = models.CharField('Заголовок', max_length=200)
@@ -53,6 +53,8 @@ class Post(models.Model):
         related_name='posts',
         verbose_name='Теги')
 
+    objects = PostQuerySet.as_manager()
+
     def __str__(self):
         return self.title
 
@@ -63,8 +65,6 @@ class Post(models.Model):
         ordering = ['-published_at']
         verbose_name = 'пост'
         verbose_name_plural = 'посты'
-
-    objects = PostQuerySet.as_manager()
 
 
 class Tag(models.Model):
@@ -79,13 +79,12 @@ class Tag(models.Model):
     def get_absolute_url(self):
         return reverse('tag_filter', args={'tag_title': self.slug})
 
+    objects = TagQuerySet.as_manager()
+
     class Meta:
         ordering = ['title']
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
-    
-    objects = TagQuerySet.as_manager()
-
 
 
 class Comment(models.Model):
@@ -102,10 +101,10 @@ class Comment(models.Model):
     text = models.TextField('Текст комментария')
     published_at = models.DateTimeField('Дата и время публикации')
 
-    def __str__(self):
-        return f'{self.author.username} under {self.post.title}'
-
     class Meta:
         ordering = ['published_at']
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
+
+    def __str__(self):
+        return f'{self.author.username} under {self.post.title}'
